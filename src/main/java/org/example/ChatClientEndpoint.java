@@ -1,10 +1,6 @@
 package org.example;
 
-import jakarta.websocket.ClientEndpoint;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
+import jakarta.websocket.*;
 import org.glassfish.tyrus.client.ClientManager;
 
 import java.net.URI;
@@ -21,12 +17,14 @@ public class ChatClientEndpoint {
     }
 
     @OnMessage
-    public void onMessage(String message) {
+    public void onMessage(String message)
+    {
         System.out.println("Server: " + message);
     }
 
     @OnClose
-    public void onClose(Session session) {
+    public void onClose(Session session)
+    {
         System.out.println("Disconnected from the server.");
     }
 
@@ -44,11 +42,10 @@ public class ChatClientEndpoint {
 
     public static void main(String[] args) {
         try {
-            // Create Tyrus client and connect to the server
-            ClientManager client = ClientManager.createClient();
-            URI uri = URI.create("ws://localhost:8080/chat");
-            ChatClientEndpoint clientEndpoint = new ChatClientEndpoint();
-            client.connectToServer(clientEndpoint, uri);
+            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            ChatClientEndpoint client = new ChatClientEndpoint();
+            //client instance is the one to be connected to the server
+            container.connectToServer(client, new URI("ws://localhost:8080/ws/chat"));
 
             System.out.println("Chat client started. Type your messages:");
 
@@ -56,7 +53,7 @@ public class ChatClientEndpoint {
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 String message = scanner.nextLine();
-                clientEndpoint.sendMessage(message);
+                client.sendMessage(message);
             }
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
